@@ -175,7 +175,7 @@ def fat_partition(code, byte_name, start_sect_addr, size_of_partition):
             no_of_files_direct = ((byte_name[start_sect_addr * 512 + 18] << 8) | byte_name[start_sect_addr * 512 + 17]) #Number of files in the root directory
             bytes_per_sect = ((byte_name[start_sect_addr * 512 + 12] << 8) | byte_name[start_sect_addr * 512 + 11]) #bytes per sector in the file system
             no_of_files_sect = int(round(no_of_files_direct / bytes_per_sect))  #number of files in root directory in sectors
-            first_sect_cluster = fat_end_sect + no_of_files_sect    #First sector of cluster 2 will be fat end sector address + number of root directory files in sectors - 1
+            first_sect_cluster = fat_end_sect + no_of_files_sect + 1    #First sector of cluster 2 will be fat end sector address + number of root directory files in sectors + 1
         else:   #If the file system is of type FAT 32
             first_sect_cluster = fat_end_sect + 1   #First sector of the cluster 2 will be end sector of FAT + 1
 
