@@ -145,20 +145,21 @@ def partition_table(byte_name):
 
 def fat_partition(code, byte_name, start_sect_addr, size_of_partition):
     start_sect = 0 #Reserved area always starts at sector 0
-    size = ((byte_name[start_sect_addr + 15] << 8 )| byte_name[start_sect_addr + 14])
+    # print(start_sect_addr * 512 + 15,start_sect_addr * 512 + 14,byte_name[start_sect_addr * 512 + 15],(byte_name[start_sect_addr * 512 + 14]))
+    size = ((byte_name[start_sect_addr * 512 + 15] << 8 )| byte_name[start_sect_addr * 512 + 14])
 
     if (start_sect + size) < 1:
         end_sect = 0
     else:
         end_sect = start_sect + size - 1
 
-    sect_per_cluster = byte_name[start_sect_addr + 13]
-    no_of_fat = byte_name[start_sect_addr + 16]
+    sect_per_cluster = byte_name[start_sect_addr * 512 + 13]
+    no_of_fat = byte_name[start_sect_addr * 512 + 16]
 
     if ((code == "04") or (code == "06")  or (code == "86")):
-        size_of_fat = ((byte_name[start_sect_addr + 23] << 8) | byte_name[start_sect_addr + 22])
+        size_of_fat = ((byte_name[start_sect_addr * 512 + 23] << 8) | byte_name[start_sect_addr * 512 + 22])
     else:
-        size_of_fat = ((((byte_name[start_sect_addr + 35] << 24) | (byte_name[start_sect_addr + 34] << 16)) | (byte_name[start_sect_addr + 33] << 8)) | (byte_name[start_sect_addr + 32]))
+        size_of_fat = ((((byte_name[start_sect_addr * 512 + 35] << 24) | (byte_name[start_sect_addr * 512 + 34] << 16)) | (byte_name[start_sect_addr * 512 + 33] << 8)) | (byte_name[start_sect_addr * 512 + 32]))
 
     if no_of_fat == 0: #If number of FATs is 0, Then FAT start and end sectors will be 0
         fat_start_sect = 0
@@ -171,10 +172,10 @@ def fat_partition(code, byte_name, start_sect_addr, size_of_partition):
         first_sect_cluster = 0
     else:
         if ((code == "04") or (code == "06") or (code == "86")): #If it is a FAT 16 file type
-            no_of_files_direct = ((byte_name[start_sect_addr + 18] << 8) | byte_name[start_sect_addr + 17]) #Number of files in the root directory
-            bytes_per_sect = ((byte_name[start_sect_addr + 12] << 8) | byte_name[start_sect_addr + 11]) #bytes per sector in the file system
-            no_of_files_sect = no_of_files_direct / bytes_per_sect  #number of files in root directory in sectors
-            first_sect_cluster = fat_end_sect + no_of_files_sect - 1    #First sector of cluster 2 will be fat end sector address + number of root directory files in sectors - 1
+            no_of_files_direct = ((byte_name[start_sect_addr * 512 + 18] << 8) | byte_name[start_sect_addr * 512 + 17]) #Number of files in the root directory
+            bytes_per_sect = ((byte_name[start_sect_addr * 512 + 12] << 8) | byte_name[start_sect_addr * 512 + 11]) #bytes per sector in the file system
+            no_of_files_sect = int(round(no_of_files_direct / bytes_per_sect))  #number of files in root directory in sectors
+            first_sect_cluster = fat_end_sect + no_of_files_sect    #First sector of cluster 2 will be fat end sector address + number of root directory files in sectors - 1
         else:   #If the file system is of type FAT 32
             first_sect_cluster = fat_end_sect + 1   #First sector of the cluster 2 will be end sector of FAT + 1
 
@@ -207,13 +208,25 @@ def main():
 
     print("MD5: {0}".format(md5.hexdigest()))
     print("SHA1: {0}".format(sha1.hexdigest()))
+    arr = sys.argv[1].split('.')
+    file_md5 = "MD5-" + arr[0] + ".txt"
+    file_sha1 = "SHA1-" + arr[0] + ".txt"
+
+    #Writing the MD5 and SHA1 hash to files for the image.
+    output_file_md5 = open(file_md5, "w")
+    output_file_md5.write(md5.hexdigest())
+    output_file_md5.close()
+
+    output_file_sha1 = open(file_sha1, 'w')
+    output_file_sha1.write(sha1.hexdigest())
+    output_file_sha1.close()
 
     print("\n")
     # --------------------Requirement 3---------------------#
     print("# --------------------Requirement 3---------------------#")
     byte_name = filename.read()
     partition_table(byte_name)
-
+    filename.close()
     return 0
 
 
