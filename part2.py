@@ -159,7 +159,7 @@ def fat_partition(code, byte_name, start_sect_addr, size_of_partition):
     if ((code == "04") or (code == "06")  or (code == "86")):
         size_of_fat = ((byte_name[start_sect_addr * 512 + 23] << 8) | byte_name[start_sect_addr * 512 + 22])
     else:
-        size_of_fat = ((((byte_name[start_sect_addr * 512 + 35] << 24) | (byte_name[start_sect_addr * 512 + 34] << 16)) | (byte_name[start_sect_addr * 512 + 33] << 8)) | (byte_name[start_sect_addr * 512 + 32]))
+        size_of_fat = ((((byte_name[start_sect_addr * 512 + 39] << 24) | (byte_name[start_sect_addr * 512 + 38] << 16)) | (byte_name[start_sect_addr * 512 + 37] << 8)) | (byte_name[start_sect_addr * 512 + 36]))
 
     if no_of_fat == 0: #If number of FATs is 0, Then FAT start and end sectors will be 0
         fat_start_sect = 0
