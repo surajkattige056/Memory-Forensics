@@ -1,7 +1,10 @@
+#Authors: Ahmed Alagili, Suraj S Kattige
+#Course: CSE469
+
 import hashlib
 import sys
 
-
+#This function is used to find the type of partitions of the file systems from the partition table
 def type_of_partition(a):
     if(a == 0x01):
         output = "DOS 12-bit FAT"
@@ -91,6 +94,8 @@ def type_of_partition(a):
             code = 99
     return output, code
 
+
+#This function parses the partition table in the MBR
 def partition_table(byte_name):
     i = 446
     while i < 510:
@@ -143,6 +148,8 @@ def partition_table(byte_name):
             print("===============================================================")
     return 0
 
+
+#This function parses the contents in VBR
 def fat_partition(code, byte_name, start_sect_addr, size_of_partition):
     start_sect = 0 #Reserved area always starts at sector 0
     size = ((byte_name[start_sect_addr * 512 + 15] << 8 )| byte_name[start_sect_addr * 512 + 14])
@@ -186,12 +193,13 @@ def fat_partition(code, byte_name, start_sect_addr, size_of_partition):
     print("The first sector of cluster 2: %s sectors" %(first_sect_cluster))
     return 0
 
+
 def main():
-    # --------------------Requirement 1---------------------#
+    # --------------------Requirement A---------------------#
     filename = open(sys.argv[1], "rb")
 
-    #--------------------Requir1ement 2---------------------#
-    print("# --------------------Requirement 2---------------------#")
+    #--------------------Requir1ement B---------------------#
+    print("# --------------------Requirement B---------------------#")
     BUF_SIZE = 65536  # lets read stuff in 64kb chunks!
 
     md5 = hashlib.md5()
@@ -221,14 +229,12 @@ def main():
     output_file_sha1.write(sha1.hexdigest())
     output_file_sha1.close()
     print("\n")
-    # --------------------Requirement 3---------------------#
-    print("# --------------------Requirement 3---------------------#")
+    # --------------------Requirement C---------------------#
+    print("# --------------------Requirement C---------------------#")
     byte_name = filename.read()
     partition_table(byte_name)
     filename.close()
     return 0
-
-
 
 
 main()
