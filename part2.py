@@ -139,13 +139,12 @@ def partition_table(byte_name):
 
             if((code == "04") or (code == "06") or (code == "0B") or (code == "0C") or (code == "1B") or (code == "86")):
                 fat_partition(code, byte_name, start_sect_addr, size_of_partition)
-
             print("\n")
+            print("===============================================================")
     return 0
 
 def fat_partition(code, byte_name, start_sect_addr, size_of_partition):
     start_sect = 0 #Reserved area always starts at sector 0
-    # print(start_sect_addr * 512 + 15,start_sect_addr * 512 + 14,byte_name[start_sect_addr * 512 + 15],(byte_name[start_sect_addr * 512 + 14]))
     size = ((byte_name[start_sect_addr * 512 + 15] << 8 )| byte_name[start_sect_addr * 512 + 14])
 
     if (start_sect + size) < 1:
@@ -174,10 +173,10 @@ def fat_partition(code, byte_name, start_sect_addr, size_of_partition):
         if ((code == "04") or (code == "06") or (code == "86")): #If it is a FAT 16 file type
             no_of_files_direct = ((byte_name[start_sect_addr * 512 + 18] << 8) | byte_name[start_sect_addr * 512 + 17]) #Number of files in the root directory
             bytes_per_sect = ((byte_name[start_sect_addr * 512 + 12] << 8) | byte_name[start_sect_addr * 512 + 11]) #bytes per sector in the file system
-            no_of_files_sect = int(round(no_of_files_direct / bytes_per_sect))  #number of files in root directory in sectors
-            first_sect_cluster = fat_end_sect + no_of_files_sect + 1    #First sector of cluster 2 will be fat end sector address + number of root directory files in sectors + 1
+            no_of_files_sect = int(round(no_of_files_direct * 32/ bytes_per_sect))  #number of files in root directory in sectors
+            first_sect_cluster = fat_end_sect + no_of_files_sect + start_sect_addr + 1    #First sector of cluster 2 will be fat end sector address + number of root directory files in sectors + 1
         else:   #If the file system is of type FAT 32
-            first_sect_cluster = fat_end_sect + 1   #First sector of the cluster 2 will be end sector of FAT + 1
+            first_sect_cluster = fat_end_sect + start_sect_addr + 1   #First sector of the cluster 2 will be end sector of FAT + 1
 
     print("Reserved area:\tStart sector: %s\tEnding sector: %s\tSize: %s" %(start_sect, end_sect, size))
     print("Sectors per cluster: %s sectors" %(sect_per_cluster))
@@ -191,7 +190,7 @@ def main():
     # --------------------Requirement 1---------------------#
     filename = open(sys.argv[1], "rb")
 
-    #--------------------Requirement 2---------------------#
+    #--------------------Requir1ement 2---------------------#
     print("# --------------------Requirement 2---------------------#")
     BUF_SIZE = 65536  # lets read stuff in 64kb chunks!
 
@@ -208,7 +207,8 @@ def main():
 
     print("MD5: {0}".format(md5.hexdigest()))
     print("SHA1: {0}".format(sha1.hexdigest()))
-    arr = sys.argv[1].split('.')
+    arr1 = sys.argv[1].split('\\')
+    arr = arr1[len(arr1) - 1].split('.')
     file_md5 = "MD5-" + arr[0] + ".txt"
     file_sha1 = "SHA1-" + arr[0] + ".txt"
 
@@ -220,7 +220,6 @@ def main():
     output_file_sha1 = open(file_sha1, 'w')
     output_file_sha1.write(sha1.hexdigest())
     output_file_sha1.close()
-
     print("\n")
     # --------------------Requirement 3---------------------#
     print("# --------------------Requirement 3---------------------#")
